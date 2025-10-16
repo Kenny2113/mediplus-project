@@ -24,9 +24,9 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          docker build -t mediplus:v1 .
-          docker tag mediplus:v1 493608842618.dkr.ecr.us-east-1.amazonaws.com/mediplus:v1
-          docker push 493608842618.dkr.ecr.us-east-1.amazonaws.com/mediplus:v1
+          docker build -t mediplus:v2 .
+          docker tag mediplus:v1 493608842618.dkr.ecr.us-east-1.amazonaws.com/mediplus:v2
+          docker push 493608842618.dkr.ecr.us-east-1.amazonaws.com/mediplus:v2
 
 
   deploy:
@@ -39,6 +39,6 @@ jobs:
            chmod 600 mykey.pem
            cat mykey.pem
 
-           ssh -o   StrictHostKeyChecking=no -i mykey.pem ubuntu@54.173.72.91 "docker ps"
+           ssh -o   StrictHostKeyChecking=no -i mykey.pem ubuntu@54.173.72.91 "docker pull 493608842618.dkr.ecr.us-east-1.amazonaws.com/mediplus:v2"
             
-            ssh -o   StrictHostKeyChecking=no -i mykey.pem ubuntu@54.173.72.91 "hostnamectl"
+            ssh -o   StrictHostKeyChecking=no -i mykey.pem ubuntu@54.173.72.91 "docker run -d -p 80:80 493608842618.dkr.ecr.us-east-1.amazonaws.com/mediplus:v2"
