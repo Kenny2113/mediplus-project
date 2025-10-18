@@ -24,29 +24,21 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          docker build -t mediplus:v2 .
-          docker tag mediplus:v2 493608842618.dkr.ecr.us-east-1.amazonaws.com/mediplus:v2
-          docker push 493608842618.dkr.ecr.us-east-1.amazonaws.com/mediplus:v2
+          docker build -t mediplus:v3 .
+          docker tag mediplus:v3 493608842618.dkr.ecr.us-east-1.amazonaws.com/mediplus:v3
+          docker push 493608842618.dkr.ecr.us-east-1.amazonaws.com/mediplus:v3
 
 
   deploy:
-  runs-on: ubuntu-latest
-  needs: build-push
+     runs-on: ubuntu-latest
+     needs: build-push
+     steps:
+       - name: Check SSH key
+         run: |
+           echo "${{ secrets.SSH_KEY }}" > mykey.pem
+           chmod 600 mykey.pem
+           cat mykey.pem
 
-  steps:
-    - name: Check SSH key
-      run: |
-        echo "${{ secrets.SSH_KEY }}" > mykey.pem
-        chmod 600 mykey.pem
-        cat mykey.pem
-
-        # Pull the latest image from ECR
-        ssh -o StrictHostKeyChecking=no -i mykey.pem ubuntu@54.173.72.91 "
-          sudo docker pull 493608842618.dkr.ecr.us-east-1.amazonaws.com/mediplus:v2
-        "
-
-        # Remove any existing container and redeploy cleanly
-        ssh -o StrictHostKeyChecking=no -i mykey.pem ubuntu@54.173.72.91 "
-          sudo docker rm -f mediplus-app || true
-          sudo docker run -d -p 80:80 --name mediplus-app 493608842618.dkr.ecr.us-east-1.amazonaws.com/mediplus:v2
-        "
+           ssh -o   StrictHostKeyChecking=no -i mykey.pem ubuntu@54.173.72.91 "docker pull 493608842618.dkr.ecr.us-east-1.amazonaws.com/mediplus:v3"
+            
+            ssh -o   StrictHostKeyChecking=no -i mykey.pem ubuntu@54.173.72.91 "docker run -d -p 80:80 493608842618.dkr.ecr.us-east-1.amazonaws.com/mediplus:v3"
